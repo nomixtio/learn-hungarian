@@ -1,0 +1,8 @@
+# Copy to .dev.vars for local development (never commit .dev.vars).
+# Get a key from https://console.soniox.com (must match the region below).
+SONIOX_API_KEY=your_soniox_api_key_here
+SONIOX_REGION=eu
+
+# VAPID private key (JWK JSON) for web push. Generate with: npx @pushforge/builder vapid
+# Public key goes in wrangler.jsonc vars as VAPID_PUBLIC_KEY.
+VAPID_PRIVATE_KEY={"alg":"ES256","key_ops":["sign"],"ext":true,"kty":"EC","x":"your_x","y":"your_y","crv":"P-256","d":"your_d"}

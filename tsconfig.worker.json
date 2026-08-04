@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["./worker-configuration.d.ts"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["worker", "src/app-version.json", "src/lib/courses/**/*.ts"]
+}

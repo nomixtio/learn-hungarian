@@ -1,0 +1,269 @@
+@import 'tailwindcss';
+
+:root {
+	--app-text: #131813;
+	--app-bg: #f5f9f6;
+	--app-bg-element: #ffffff;
+	--app-bg-selected: #e3ede7;
+	--app-text-secondary: #5c675f;
+	--app-border: rgba(19, 24, 19, 0.1);
+	--app-accent: #0b6b3a;
+	--app-accent-soft: rgba(11, 107, 58, 0.1);
+	--app-danger: #b3261e;
+	--app-danger-soft: #fbe9e7;
+	--app-success: #15803d;
+	--app-aurora: rgba(34, 197, 94, 0.09);
+	color-scheme: light;
+}
+
+:root[data-theme='light'] {
+	--app-text: #131813;
+	--app-bg: #f5f9f6;
+	--app-bg-element: #ffffff;
+	--app-bg-selected: #e3ede7;
+	--app-text-secondary: #5c675f;
+	--app-border: rgba(19, 24, 19, 0.1);
+	--app-accent: #0b6b3a;
+	--app-accent-soft: rgba(11, 107, 58, 0.1);
+	--app-danger: #b3261e;
+	--app-danger-soft: #fbe9e7;
+	--app-success: #15803d;
+	--app-aurora: rgba(34, 197, 94, 0.09);
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	--app-text: #f2f5f3;
+	--app-bg: #090c0a;
+	--app-bg-element: #121714;
+	--app-bg-selected: #1e2620;
+	--app-text-secondary: #9aa59e;
+	--app-border: rgba(255, 255, 255, 0.08);
+	--app-accent: #22c55e;
+	--app-accent-soft: rgba(34, 197, 94, 0.12);
+	--app-danger: #f87171;
+	--app-danger-soft: rgba(248, 113, 113, 0.12);
+	--app-success: #4ade80;
+	--app-aurora: rgba(34, 197, 94, 0.14);
+	color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root[data-theme='system'] {
+		--app-text: #f2f5f3;
+		--app-bg: #090c0a;
+		--app-bg-element: #121714;
+		--app-bg-selected: #1e2620;
+		--app-text-secondary: #9aa59e;
+		--app-border: rgba(255, 255, 255, 0.08);
+		--app-accent: #22c55e;
+		--app-accent-soft: rgba(34, 197, 94, 0.12);
+		--app-danger: #f87171;
+		--app-danger-soft: rgba(248, 113, 113, 0.12);
+		--app-success: #4ade80;
+		--app-aurora: rgba(34, 197, 94, 0.14);
+		color-scheme: dark;
+	}
+}
+
+@theme {
+	--color-text: var(--app-text);
+	--color-bg: var(--app-bg);
+	--color-bg-element: var(--app-bg-element);
+	--color-bg-selected: var(--app-bg-selected);
+	--color-text-secondary: var(--app-text-secondary);
+	--color-border: var(--app-border);
+	--color-accent: var(--app-accent);
+	--color-accent-soft: var(--app-accent-soft);
+	--color-danger: var(--app-danger);
+	--color-danger-soft: var(--app-danger-soft);
+	--color-success: var(--app-success);
+	--font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body,
+	#root {
+		height: 100%;
+		margin: 0;
+	}
+
+	#root {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+	}
+
+	body {
+		font-family: var(--font-sans);
+		color: var(--color-text);
+		background: var(--color-bg);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	/* Soft green aurora behind the whole app */
+	body::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+		background:
+			radial-gradient(ellipse 75% 45% at 50% -12%, var(--app-aurora), transparent 60%),
+			radial-gradient(ellipse 45% 35% at 92% 30%, color-mix(in srgb, var(--app-aurora) 55%, transparent), transparent 55%);
+	}
+
+	button {
+		font: inherit;
+		cursor: pointer;
+		border: none;
+		background: none;
+		padding: 0;
+		color: inherit;
+	}
+
+	input,
+	select {
+		font: inherit;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--app-accent);
+		outline-offset: 2px;
+	}
+
+	::selection {
+		background: color-mix(in srgb, var(--app-accent) 30%, transparent);
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-family: var(--font-display);
+		letter-spacing: -0.02em;
+	}
+}
+
+@layer components {
+	/* Primary action: vivid green pill, same in both themes (brand) */
+	.btn-primary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 999px;
+		padding: 0.5rem 1.25rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 600;
+		background: linear-gradient(180deg, #2ee06c, #16a34a);
+		color: #052e16;
+		box-shadow:
+			0 0 0 1px rgba(34, 197, 94, 0.4),
+			0 4px 18px rgba(34, 197, 94, 0.28);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.2s ease,
+			opacity 0.15s ease;
+	}
+
+	.btn-primary:enabled:hover,
+	a.btn-primary:hover {
+		box-shadow:
+			0 0 0 1px rgba(34, 197, 94, 0.55),
+			0 6px 24px rgba(34, 197, 94, 0.4);
+		transform: translateY(-1px);
+	}
+
+	.btn-primary:enabled:active,
+	a.btn-primary:active {
+		transform: translateY(0);
+		opacity: 0.9;
+	}
+
+	.btn-primary:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+		box-shadow: none;
+	}
+
+	/* Secondary action: quiet surface + border */
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 999px;
+		padding: 0.5rem 1.25rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 600;
+		border: 1px solid var(--app-border);
+		background: var(--app-bg-element);
+		color: var(--app-text);
+		transition:
+			border-color 0.2s ease,
+			background 0.2s ease,
+			opacity 0.15s ease;
+	}
+
+	.btn-secondary:enabled:hover,
+	a.btn-secondary:hover {
+		border-color: color-mix(in srgb, var(--app-accent) 45%, transparent);
+		background: var(--app-bg-selected);
+	}
+
+	.btn-secondary:enabled:active,
+	a.btn-secondary:active {
+		opacity: 0.8;
+	}
+
+	.btn-secondary:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
+
+	/* Surface card */
+	.card {
+		border-radius: 1rem;
+		border: 1px solid var(--app-border);
+		background: var(--app-bg-element);
+	}
+
+	/* Inline error notice */
+	.notice-danger {
+		border-radius: 0.75rem;
+		border: 1px solid color-mix(in srgb, var(--app-danger) 25%, transparent);
+		background: var(--app-danger-soft);
+		color: var(--app-danger);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+	}
+
+	/* Form control */
+	.field {
+		border-radius: 0.65rem;
+		border: 1px solid var(--app-border);
+		background: var(--app-bg);
+		color: var(--app-text);
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		transition: border-color 0.2s ease;
+	}
+
+	.field:focus {
+		border-color: color-mix(in srgb, var(--app-accent) 55%, transparent);
+		outline: none;
+	}
+}

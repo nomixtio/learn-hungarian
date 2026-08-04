@@ -1,0 +1,25 @@
+{
+  "short_name": "Learn Hungarian",
+  "name": "Learn Hungarian",
+  "description": "Learn Hungarian — live speech translation and practice",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0B6B3A",
+  "background_color": "#F5F9F6",
+  "orientation": "portrait",
+  "lang": "en"
+}

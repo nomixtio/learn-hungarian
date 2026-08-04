@@ -1,0 +1,28 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "learn-hungarian",
+	"main": "./worker/index.ts",
+	"compatibility_date": "2026-08-04",
+	"vars": {
+		"SONIOX_REGION": "eu",
+		"VAPID_PUBLIC_KEY": "your_vapid_public_key_here"
+	},
+	"assets": {
+		"not_found_handling": "single-page-application",
+		"binding": "ASSETS",
+		"run_worker_first": [
+			"/api/*"
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "learn-hungarian",
+			"database_id": "YOUR_D1_DATABASE_ID",
+			"migrations_dir": "migrations"
+		}
+	],
+	"triggers": {
+		"crons": ["0 * * * *"]
+	}
+}

@@ -1,0 +1,43 @@
+{
+  "name": "learn-hungarian",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Open-source PWA for learning Hungarian with live Soniox speech translation and practice",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomixtio/learn-hungarian.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && tsc -p tsconfig.worker.json --noEmit && vite build",
+    "preview": "npm run build && (test -f .dev.vars && cp .dev.vars dist/learn_hungarian/.dev.vars || true) && vite preview",
+    "predeploy": "node scripts/bump-version.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:website": "wrangler deploy -c website/wrangler.jsonc",
+    "dev:website": "wrangler dev -c website/wrangler.jsonc",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@pushforge/builder": "^2.0.5",
+    "@soniox/client": "^2.1.0",
+    "@soniox/react": "^2.1.0",
+    "@tanstack/react-router": "^1.170.18",
+    "hono": "^4.13.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.50.0",
+    "@cloudflare/workers-types": "^5.20260804.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "~19.2.2",
+    "@types/react-dom": "~19.2.2",
+    "@vitejs/plugin-react": "^4.7.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "vite": "^6.3.5",
+    "wrangler": "^4.118.0"
+  }
+}
