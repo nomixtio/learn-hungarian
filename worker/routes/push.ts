@@ -115,13 +115,23 @@ pushRoutes.post('/test', async (c) => {
 	if (!results.some((result) => result.ok)) {
 		const failed = results.find((result) => !result.ok);
 		console.error('Push test failed', failed?.status, failed?.detail);
+		const detail = failed?.detail ?? '';
+		const vapidMisconfigured =
+			detail.includes('Invalid EC key') ||
+			detail.includes('Point is not on curve') ||
+			detail.includes('VAPID_PRIVATE_KEY is not configured') ||
+			detail.includes('VAPID_PRIVATE_KEY is not valid JSON') ||
+			detail.includes('failed to parse JSON') ||
+			detail.includes('Expected property name');
 		return c.json(
 			{
-				error: 'Failed to send test notification',
+				error: vapidMisconfigured
+					? 'VAPID private key is invalid or does not match VAPID_PUBLIC_KEY in wrangler.jsonc'
+					: 'Failed to send test notification',
 				status: failed?.status,
-				detail: failed?.detail,
+				detail,
 			},
-			502,
+			vapidMisconfigured ? 500 : 502,
 		);
 	}
 

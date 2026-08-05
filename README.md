@@ -27,9 +27,15 @@ Edit `wrangler.jsonc`:
 Edit `.dev.vars`:
 
 1. Set `SONIOX_API_KEY` from the Soniox console (must match `SONIOX_REGION` in `wrangler.jsonc`)
-2. Set `VAPID_PRIVATE_KEY` (JWK JSON from the same `vapid` command)
+2. Set `VAPID_PRIVATE_KEY` (JWK JSON from the same `vapid` command — keep the value in single quotes in `.dev.vars`)
 
 For production, also set Worker secrets (never commit these):
+
+```bash
+./scripts/setup-production-secrets.sh
+```
+
+Or set secrets manually (do not paste the VAPID JWK by hand — use the script above):
 
 ```bash
 npx wrangler secret put SONIOX_API_KEY

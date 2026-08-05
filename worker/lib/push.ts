@@ -35,19 +35,33 @@ export async function sendPushNotification(
 	subscription: PushSubscription,
 	payload: PushPayload,
 ): Promise<PushSendResult> {
-	const { endpoint, headers, body } = await buildPushHTTPRequest({
-		privateJWK: getVapidPrivateKey(env),
-		subscription,
-		message: {
-			payload,
-			adminContact: ADMIN_CONTACT,
-			options: {
-				ttl: 86_400,
-				urgency: 'normal',
-				topic: payload.tag,
+	let endpoint: string;
+	let headers: Record<string, string> | Headers;
+	let body: ArrayBuffer;
+
+	try {
+		({ endpoint, headers, body } = await buildPushHTTPRequest({
+			privateJWK: getVapidPrivateKey(env),
+			subscription,
+			message: {
+				payload,
+				adminContact: ADMIN_CONTACT,
+				options: {
+					ttl: 86_400,
+					urgency: 'normal',
+					topic: payload.tag,
+				},
 			},
-		},
-	});
+		}));
+	} catch (error) {
+		const detail = error instanceof Error ? error.message : 'Failed to build push request';
+		return {
+			ok: false,
+			status: 500,
+			expired: false,
+			detail,
+		};
+	}
 
 	const response = await fetch(endpoint, {
 		method: 'POST',

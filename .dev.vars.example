@@ -5,4 +5,5 @@ SONIOX_REGION=eu
 
 # VAPID private key (JWK JSON) for web push. Generate with: npx @pushforge/builder vapid
 # Public key goes in wrangler.jsonc vars as VAPID_PUBLIC_KEY.
-VAPID_PRIVATE_KEY={"alg":"ES256","key_ops":["sign"],"ext":true,"kty":"EC","x":"your_x","y":"your_y","crv":"P-256","d":"your_d"}
+# Keep the value in single quotes so bash does not strip JSON string quotes.
+VAPID_PRIVATE_KEY='{"alg":"ES256","key_ops":["sign"],"ext":true,"kty":"EC","x":"your_x","y":"your_y","crv":"P-256","d":"your_d"}'

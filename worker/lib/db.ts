@@ -316,5 +316,12 @@ export function getVapidPrivateKey(env: Env): JsonWebKey {
 		throw new Error('VAPID_PRIVATE_KEY is not configured');
 	}
 
-	return JSON.parse(env.VAPID_PRIVATE_KEY) as JsonWebKey;
+	const raw = env.VAPID_PRIVATE_KEY.trim();
+	try {
+		return JSON.parse(raw) as JsonWebKey;
+	} catch {
+		throw new Error(
+			'VAPID_PRIVATE_KEY is not valid JSON. Re-upload it with ./scripts/setup-production-secrets.sh',
+		);
+	}
 }
