@@ -342,6 +342,62 @@ img {
 	object-position: top center;
 }
 
+.phone-static {
+	animation: none;
+}
+
+/* ---------- Courses showcase ---------- */
+
+.courses-showcase {
+	display: grid;
+	grid-template-columns: minmax(220px, 280px) 1fr;
+	gap: 3rem;
+	align-items: start;
+}
+
+.course-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.course-card {
+	padding: 1.35rem 1.25rem;
+	border: 1px solid var(--border);
+	border-radius: 1.1rem;
+	background: var(--surface);
+	transition:
+		border-color 0.25s ease,
+		background 0.25s ease,
+		transform 0.25s var(--ease);
+}
+
+.course-card:hover {
+	transform: translateY(-3px);
+	border-color: rgba(34, 197, 94, 0.35);
+	background: var(--surface-hover);
+}
+
+.course-card h3 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: 1.02rem;
+	font-weight: 700;
+	letter-spacing: -0.015em;
+}
+
+.course-card p {
+	margin: 0.55rem 0 0;
+	font-size: 0.92rem;
+	line-height: 1.55;
+	color: var(--text-muted);
+}
+
+.course-card em {
+	font-style: normal;
+	color: #86efac;
+}
+
 /* ---------- Sections ---------- */
 
 .section {
@@ -631,6 +687,17 @@ img {
 	.phone {
 		width: min(100%, 250px);
 		animation: none;
+	}
+
+	.courses-showcase {
+		grid-template-columns: 1fr;
+		justify-items: center;
+		gap: 2.5rem;
+	}
+
+	.course-grid {
+		grid-template-columns: 1fr;
+		width: 100%;
 	}
 
 	.steps {
