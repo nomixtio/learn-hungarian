@@ -75,11 +75,14 @@ export function AppNav() {
 				</button>
 
 				<p className="m-0 flex min-w-0 flex-1 items-center gap-2.5 truncate">
-					<span
-						className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-[#2ee06c] to-[#0b6b3a] font-display text-sm font-bold text-[#052e16] shadow-[0_0_14px_rgba(34,197,94,0.35)]"
-						aria-hidden="true">
-						H
-					</span>
+					<img
+						className="h-7 w-7 shrink-0 rounded-[0.45rem]"
+						src="/brand-mark.svg"
+						width={28}
+						height={28}
+						alt=""
+						aria-hidden="true"
+					/>
 					<span className="truncate font-display text-sm leading-5 font-semibold sm:text-base">
 						{APP_NAME}
 					</span>

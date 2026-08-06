@@ -398,6 +398,60 @@ img {
 	color: #86efac;
 }
 
+/* ---------- Theme showcase ---------- */
+
+.theme-showcase {
+	display: grid;
+	grid-template-columns: 1fr minmax(220px, 280px);
+	gap: 3rem;
+	align-items: center;
+}
+
+.theme-copy h2 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: clamp(1.9rem, 4vw, 2.75rem);
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	line-height: 1.1;
+}
+
+.theme-copy > p {
+	margin: 1rem 0 0;
+	max-width: 33rem;
+	font-size: 1.05rem;
+	line-height: 1.6;
+	color: var(--text-muted);
+}
+
+.theme-list {
+	margin: 1.75rem 0 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 0.75rem;
+	max-width: 33rem;
+}
+
+.theme-list li {
+	padding: 0.9rem 1.1rem;
+	border: 1px solid var(--border);
+	border-radius: 0.9rem;
+	background: var(--surface);
+	font-size: 0.94rem;
+	line-height: 1.5;
+	color: var(--text-muted);
+}
+
+.theme-list strong {
+	color: var(--text);
+	font-weight: 600;
+}
+
+.phone-light .phone-screen {
+	background: #f5f9f6;
+}
+
 /* ---------- Sections ---------- */
 
 .section {
@@ -698,6 +752,16 @@ img {
 	.course-grid {
 		grid-template-columns: 1fr;
 		width: 100%;
+	}
+
+	.theme-showcase {
+		grid-template-columns: 1fr;
+		gap: 2.5rem;
+	}
+
+	.theme-showcase .phone {
+		order: -1;
+		justify-self: center;
 	}
 
 	.steps {

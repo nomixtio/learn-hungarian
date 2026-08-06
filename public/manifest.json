@@ -18,8 +18,8 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#0B6B3A",
-  "background_color": "#F5F9F6",
+  "theme_color": "#1A1A2E",
+  "background_color": "#1A1A2E",
   "orientation": "portrait",
   "lang": "en"
 }
