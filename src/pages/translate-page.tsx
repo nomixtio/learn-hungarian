@@ -6,7 +6,7 @@ import { fetchSonioxTemporaryKey } from '@/lib/soniox-config';
 export function TranslatePage() {
 	return (
 		<SonioxProvider
-			config={() => fetchSonioxTemporaryKey('transcribe_websocket')}
+			config={fetchSonioxTemporaryKey}
 			permissions={null}>
 			<TranslatePanel />
 		</SonioxProvider>

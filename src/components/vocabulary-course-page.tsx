@@ -1,5 +1,6 @@
 import { NumberListenButton } from '@/components/number-listen-button';
 import { useHungarianTts } from '@/hooks/use-hungarian-tts';
+import { getAudioId } from '@/lib/audio-catalog';
 import type { VocabularyCourse } from '@/lib/courses/types';
 
 export function VocabularyCoursePage({ course }: { course: VocabularyCourse }) {
@@ -64,7 +65,7 @@ export function VocabularyCoursePage({ course }: { course: VocabularyCourse }) {
 											isLoading={loadingKey === entryKey}
 											isPlaying={playingKey === entryKey}
 											hasError={errorKey === entryKey}
-											onPlay={() => play(entryKey, entry.hungarian)}
+											onPlay={() => play(entryKey, getAudioId(entry.hungarian))}
 										/>
 									</li>
 								);

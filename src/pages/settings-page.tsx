@@ -1,6 +1,7 @@
 import { AppRefresh } from '@/components/app-refresh';
 import { NotificationSettings } from '@/components/notification-settings';
 import { ThemeSettings } from '@/components/theme-settings';
+import { VoiceSettings } from '@/components/voice-settings';
 
 export function SettingsPage() {
 	return (
@@ -22,6 +23,8 @@ export function SettingsPage() {
 			</section>
 
 			<ThemeSettings />
+
+			<VoiceSettings />
 
 			<NotificationSettings />
 		</div>

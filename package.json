@@ -17,7 +17,11 @@
     "deploy": "npm run build && wrangler deploy",
     "deploy:website": "wrangler deploy -c website/wrangler.jsonc",
     "dev:website": "wrangler dev -c website/wrangler.jsonc",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "generate:audio": "tsx --tsconfig tsconfig.scripts.json scripts/generate-audio.ts",
+    "generate:audio:female": "tsx --tsconfig tsconfig.scripts.json scripts/generate-audio.ts --female",
+    "generate:audio:male": "tsx --tsconfig tsconfig.scripts.json scripts/generate-audio.ts --male",
+    "build:audio-catalog": "tsx --tsconfig tsconfig.scripts.json scripts/build-audio-catalog.ts"
   },
   "dependencies": {
     "@pushforge/builder": "^2.0.5",
@@ -29,6 +33,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@types/node": "^26.1.2",
     "@cloudflare/vite-plugin": "^1.50.0",
     "@cloudflare/workers-types": "^5.20260804.1",
     "@tailwindcss/vite": "^4.3.3",
@@ -36,6 +41,7 @@
     "@types/react-dom": "~19.2.2",
     "@vitejs/plugin-react": "^4.7.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
     "typescript": "~6.0.3",
     "vite": "^6.3.5",
     "wrangler": "^4.118.0"

@@ -8,7 +8,7 @@ Vite + React PWA for learning Hungarian — live speech-to-English translation a
 
 You need:
 
-- A [Soniox](https://console.soniox.com) account with an API key (STT + TTS)
+- A [Soniox](https://console.soniox.com) account with an API key (live speech translation)
 - A [Cloudflare](https://dash.cloudflare.com) account for Workers and D1
 - Node.js 20+
 
@@ -76,6 +76,10 @@ Open the local Vite URL. The Cloudflare Vite plugin runs the Worker (Hono API) a
 | `npm run deploy` | Bump build number, build, and deploy with Wrangler |
 | `npm run deploy:website` | Deploy the marketing site Worker (`website/`) |
 | `npm run dev:website` | Preview the marketing site locally |
+| `npm run build:audio-catalog` | Regenerate `src/lib/audio-catalog.ts` after vocabulary changes |
+| `npm run generate:audio` | Generate course MP3s with ElevenLabs (both voices) |
+| `npm run generate:audio:female` | Generate female voice MP3s only |
+| `npm run generate:audio:male` | Generate male voice MP3s only |
 | `npm run cf-typegen` | Regenerate `worker-configuration.d.ts` after Wrangler config changes |
 
 `predeploy` bumps [`src/app-version.json`](src/app-version.json). The client compares that baked-in build to `GET /api/meta` and prompts to refresh when a newer deploy is live (useful for installed PWAs).
@@ -89,11 +93,36 @@ The long-lived Soniox API key **never** ships to the browser.
 - **Production:** `npx wrangler secret put SONIOX_API_KEY` and `npx wrangler secret put VAPID_PRIVATE_KEY`
 - **Region:** set `SONIOX_REGION` in `wrangler.jsonc` (`eu`, `jp`, or omit for US). API keys are region-scoped — an EU project key only works with `SONIOX_REGION=eu`. Local dev: add `SONIOX_REGION=eu` to `.dev.vars` if needed.
 
-The SPA calls `POST /api/soniox/temporary-key`, which mints a short-lived Soniox temporary API key (`transcribe_websocket` for live STT, `tts_rt` for course TTS).
+The SPA calls `POST /api/soniox/temporary-key`, which mints a short-lived Soniox temporary API key for live speech-to-text translation on the Translate page.
 
-**Troubleshooting listen / STT errors**
+Course vocabulary audio is served from pre-generated MP3 files under `public/audio/` (no Soniox TTS at runtime).
 
-1. Confirm the key works: in [Soniox console](https://console.soniox.com), create or copy an API key with STT and TTS access.
+## Regenerating course audio
+
+When vocabulary or voice settings change:
+
+1. Add `ELEVENLABS_API_KEY` to `.dev.vars` (see [`.dev.vars.example`](.dev.vars.example))
+2. If course vocabulary changed, regenerate the audio ID catalog:
+   ```bash
+   npm run build:audio-catalog
+   ```
+3. Edit voice IDs at the top of [`scripts/generate-audio.ts`](scripts/generate-audio.ts) if you want different actors
+4. Run the generator (skips existing files; pass `--force` to regenerate all):
+
+```bash
+npm run generate:audio              # both voices
+npm run generate:audio:female       # female only
+npm run generate:audio:male         # male only
+npm run generate:audio -- --force   # regenerate all
+```
+
+5. Commit the updated files in `public/audio/` and any changes to `src/lib/audio-catalog.ts`
+
+No ElevenLabs key is needed to run or deploy the app — MP3s are static assets on the CDN.
+
+**Troubleshooting translate / STT errors**
+
+1. Confirm the key works: in [Soniox console](https://console.soniox.com), create or copy an API key with STT access.
 2. Re-set the secret: `npx wrangler secret put SONIOX_API_KEY` and paste the key once.
 3. After a failed deploy, secrets persist — you do not need to redeploy only for a secret change, but redeploy if Worker code changed.
 4. If the app shows *"Soniox API key is invalid or does not match SONIOX_REGION"*, the key is from a different Soniox region than configured (e.g. EU key with US endpoints). Set `SONIOX_REGION` in `wrangler.jsonc` to match your Soniox project.
@@ -163,6 +192,6 @@ src/                 # React SPA (TanStack Router + Tailwind)
 worker/              # Hono API on Cloudflare Workers
 website/             # Marketing site (separate Worker, custom domain)
 migrations/          # D1 migrations
-public/              # PWA manifest and icons
+public/              # PWA manifest, icons, and course audio (public/audio/)
 wrangler.jsonc.example  # Copy to wrangler.jsonc (gitignored)
 ```

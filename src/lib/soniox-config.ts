@@ -1,7 +1,3 @@
-import type { SonioxConnectionConfig } from '@soniox/client';
-
-export type SonioxUsageType = 'transcribe_websocket' | 'tts_rt';
-
 type SonioxClientRegion = 'eu' | 'jp' | undefined;
 
 type TemporaryKeyResponse = {
@@ -9,14 +5,13 @@ type TemporaryKeyResponse = {
 	expires_at: string;
 	region?: SonioxClientRegion;
 	error?: string;
-	tts_defaults?: SonioxConnectionConfig['tts_defaults'];
 };
 
-async function fetchTemporaryKey(usageType: SonioxUsageType): Promise<TemporaryKeyResponse> {
+async function fetchTemporaryKey(): Promise<TemporaryKeyResponse> {
 	const response = await fetch('/api/soniox/temporary-key', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ usage_type: usageType }),
+		body: JSON.stringify({ usage_type: 'transcribe_websocket' }),
 	});
 
 	const data = (await response.json()) as TemporaryKeyResponse;
@@ -31,23 +26,10 @@ async function fetchTemporaryKey(usageType: SonioxUsageType): Promise<TemporaryK
 	return data;
 }
 
-export async function fetchSonioxTemporaryKey(
-	usageType: SonioxUsageType,
-): Promise<{ api_key: string; region?: SonioxClientRegion }> {
-	const data = await fetchTemporaryKey(usageType);
+export async function fetchSonioxTemporaryKey(): Promise<{
+	api_key: string;
+	region?: SonioxClientRegion;
+}> {
+	const data = await fetchTemporaryKey();
 	return { api_key: data.api_key, region: data.region };
-}
-
-export async function fetchSonioxTtsConfig(): Promise<SonioxConnectionConfig> {
-	const data = await fetchTemporaryKey('tts_rt');
-	return {
-		api_key: data.api_key,
-		region: data.region,
-		tts_defaults: data.tts_defaults ?? {
-			model: 'tts-rt-v1',
-			language: 'hu',
-			voice: 'Maya',
-			audio_format: 'wav',
-		},
-	};
 }

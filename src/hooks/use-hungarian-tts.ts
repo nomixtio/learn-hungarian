@@ -1,16 +1,12 @@
-import { useTts } from '@soniox/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { fetchSonioxTtsConfig } from '@/lib/soniox-config';
-
-const TTS_MIME_TYPE = 'audio/wav';
+import { useVoicePreference } from '@/hooks/use-voice-preference';
+import type { AudioPhraseId } from '@/lib/audio-catalog';
+import { buildAudioAssetUrl } from '@/lib/voices';
 
 export function useHungarianTts() {
-	const cacheRef = useRef(new Map<string, string>());
+	const { preference: voice } = useVoicePreference();
 	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const chunksRef = useRef<Uint8Array[]>([]);
-	const activeKeyRef = useRef<string | null>(null);
-	const activeWordRef = useRef<string | null>(null);
 
 	const [loadingKey, setLoadingKey] = useState<string | null>(null);
 	const [playingKey, setPlayingKey] = useState<string | null>(null);
@@ -33,8 +29,20 @@ export function useHungarianTts() {
 			stopCurrent();
 			const audio = new Audio(url);
 			audioRef.current = audio;
-			setPlayingKey(entryKey);
-			setLoadingKey(null);
+			setLoadingKey(entryKey);
+
+			const handleReady = () => {
+				if (audioRef.current !== audio) {
+					return;
+				}
+				setLoadingKey(null);
+				setPlayingKey(entryKey);
+				void audio.play().catch(() => {
+					setErrorKey(entryKey);
+					setErrorMessage('Could not play audio');
+					stopCurrent();
+				});
+			};
 
 			const handleEnded = () => {
 				if (audioRef.current === audio) {
@@ -43,95 +51,37 @@ export function useHungarianTts() {
 				}
 			};
 
+			audio.addEventListener('canplay', handleReady, { once: true });
 			audio.addEventListener('ended', handleEnded);
-			audio.addEventListener('error', () => {
-				setErrorKey(entryKey);
-				setErrorMessage('Could not play audio');
-				handleEnded();
-			});
-
-			void audio.play().catch(() => {
-				setErrorKey(entryKey);
-				setErrorMessage('Could not play audio');
-				handleEnded();
-			});
+			audio.addEventListener(
+				'error',
+				() => {
+					setLoadingKey(null);
+					setErrorKey(entryKey);
+					setErrorMessage('Voice unavailable — audio file missing.');
+					handleEnded();
+				},
+				{ once: true },
+			);
 		},
 		[stopCurrent],
 	);
 
-	const { speak, cancel } = useTts({
-		mode: 'rest',
-		config: fetchSonioxTtsConfig,
-		voice: 'Maya',
-		model: 'tts-rt-v1',
-		language: 'hu',
-		audio_format: 'wav',
-		onAudio: (chunk) => {
-			chunksRef.current.push(chunk);
-		},
-		onAudioEnd: () => {
-			const chunks = chunksRef.current;
-			chunksRef.current = [];
-			const entryKey = activeKeyRef.current;
-			const hungarian = activeWordRef.current;
-			if (chunks.length === 0 || !entryKey || !hungarian) {
-				return;
-			}
-
-			const blob = new Blob(
-				chunks.map((chunk) => new Uint8Array(chunk)),
-				{ type: TTS_MIME_TYPE },
-			);
-			const url = URL.createObjectURL(blob);
-			cacheRef.current.set(hungarian, url);
-			playFromUrl(entryKey, url);
-		},
-		onError: (error) => {
-			setLoadingKey(null);
-			if (activeKeyRef.current) {
-				setErrorKey(activeKeyRef.current);
-			}
-			setErrorMessage(error.message);
-		},
-		onTerminated: () => {
-			setLoadingKey(null);
-		},
-	});
-
 	const play = useCallback(
-		(entryKey: string, hungarian: string) => {
+		(entryKey: string, audioId: AudioPhraseId) => {
 			setErrorKey(null);
 			setErrorMessage(null);
-			cancel();
-
-			const cachedUrl = cacheRef.current.get(hungarian);
-			if (cachedUrl) {
-				activeKeyRef.current = entryKey;
-				activeWordRef.current = hungarian;
-				playFromUrl(entryKey, cachedUrl);
-				return;
-			}
-
-			activeKeyRef.current = entryKey;
-			activeWordRef.current = hungarian;
-			chunksRef.current = [];
-			setLoadingKey(entryKey);
-			speak(hungarian);
+			stopCurrent();
+			playFromUrl(entryKey, buildAudioAssetUrl(voice, audioId));
 		},
-		[cancel, playFromUrl, speak],
+		[playFromUrl, stopCurrent, voice],
 	);
 
 	useEffect(() => {
-		const cache = cacheRef.current;
 		return () => {
-			cancel();
 			stopCurrent();
-			for (const url of cache.values()) {
-				URL.revokeObjectURL(url);
-			}
-			cache.clear();
 		};
-	}, [cancel, stopCurrent]);
+	}, [stopCurrent]);
 
 	return {
 		play,

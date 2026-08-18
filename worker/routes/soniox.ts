@@ -4,12 +4,6 @@ import type { Env } from '../env';
 import { isSameSiteRequest, isWithinRateLimit } from '../lib/request-guard';
 import { sonioxTemporaryKeyUrl } from '../lib/soniox-api';
 
-type UsageType = 'transcribe_websocket' | 'tts_rt';
-
-type TemporaryKeyRequest = {
-	usage_type?: UsageType;
-};
-
 type SonioxTemporaryKeyResponse = {
 	api_key: string;
 	expires_at: string;
@@ -19,8 +13,6 @@ type SonioxErrorResponse = {
 	message?: string;
 	error_type?: string;
 };
-
-const ALLOWED_USAGE_TYPES = new Set<UsageType>(['transcribe_websocket', 'tts_rt']);
 
 function sonioxClientRegion(region?: string): 'eu' | 'jp' | undefined {
 	const normalized = region?.trim().toLowerCase();
@@ -62,37 +54,17 @@ sonioxRoutes.post('/temporary-key', async (c) => {
 		return c.json({ error: 'SONIOX_API_KEY is not configured' }, 500);
 	}
 
-	let body: TemporaryKeyRequest = {};
-	try {
-		body = (await c.req.json()) as TemporaryKeyRequest;
-	} catch {
-		// Empty body is fine — default usage_type applies.
-	}
-
-	const usageType: UsageType = body.usage_type ?? 'transcribe_websocket';
-	if (!ALLOWED_USAGE_TYPES.has(usageType)) {
-		return c.json({ error: 'Invalid usage_type' }, 400);
-	}
-
-	const payload =
-		usageType === 'transcribe_websocket'
-			? {
-					usage_type: usageType,
-					expires_in_seconds: 120,
-					single_use: true,
-				}
-			: {
-					usage_type: usageType,
-					expires_in_seconds: 600,
-				};
-
 	const response = await fetch(sonioxTemporaryKeyUrl(c.env.SONIOX_REGION), {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify(payload),
+		body: JSON.stringify({
+			usage_type: 'transcribe_websocket',
+			expires_in_seconds: 120,
+			single_use: true,
+		}),
 	});
 
 	if (!response.ok) {
@@ -102,22 +74,7 @@ sonioxRoutes.post('/temporary-key', async (c) => {
 	}
 
 	const data = (await response.json()) as SonioxTemporaryKeyResponse;
-
 	const region = sonioxClientRegion(c.env.SONIOX_REGION);
-
-	if (usageType === 'tts_rt') {
-		return c.json({
-			api_key: data.api_key,
-			expires_at: data.expires_at,
-			region,
-			tts_defaults: {
-				model: 'tts-rt-v1',
-				language: 'hu',
-				voice: 'Maya',
-				audio_format: 'wav',
-			},
-		});
-	}
 
 	return c.json({ api_key: data.api_key, expires_at: data.expires_at, region });
 });
