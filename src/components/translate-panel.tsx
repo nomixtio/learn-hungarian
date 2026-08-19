@@ -296,7 +296,7 @@ export function TranslatePanel() {
 			<header className="flex flex-col items-center gap-2">
 				<h1 className="m-0 text-[32px] leading-[44px] font-semibold">Translate</h1>
 				<p className="m-0 text-center text-base leading-6 font-medium text-text-secondary">
-					Speak Hungarian — get live English text
+					Follow Hungarian conversations — get live English text
 				</p>
 				<p className="m-0 inline-flex items-center gap-1.5 rounded-full border border-border bg-bg-element px-3 py-1 text-xs leading-4 font-medium text-text-secondary">
 					<span

@@ -11,7 +11,7 @@ import {
 	upsertPushSubscription,
 } from '../lib/db';
 import { sendPushNotification } from '../lib/push';
-import { buildQuizNotification, pickNextQuizItem } from '../lib/quiz';
+import { buildScheduledNotification } from '../lib/quiz';
 
 type PushSubscriptionBody = {
 	endpoint: string;
@@ -93,12 +93,10 @@ pushRoutes.post('/test', async (c) => {
 	}
 
 	const progressMap = await getEntryProgressMap(c.env.DB, clientId);
-	const item = pickNextQuizItem(progressMap);
-	if (!item) {
+	const payload = buildScheduledNotification(progressMap);
+	if (!payload) {
 		return c.json({ error: 'No quiz items available' }, 500);
 	}
-
-	const payload = buildQuizNotification(item);
 	const results = await Promise.all(
 		subscriptions.map((subscription) =>
 			sendPushNotification(
@@ -135,7 +133,7 @@ pushRoutes.post('/test', async (c) => {
 		);
 	}
 
-	return c.json({ ok: true, item });
+	return c.json({ ok: true, notification: payload });
 });
 
 pushRoutes.get('/settings', async (c) => {

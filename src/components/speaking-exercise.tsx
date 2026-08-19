@@ -24,9 +24,6 @@ export function SpeakingExercise({
 		<div className="card flex flex-col gap-3 p-4">
 			<p className="m-0 text-sm leading-5 font-medium text-text-secondary">Say in Hungarian:</p>
 			<p className="m-0 text-base leading-6 font-semibold">{promptEnglish}</p>
-			<p className="m-0 text-xs leading-4 text-text-secondary">
-				Expected: <span className="font-medium text-text">{expectedHungarian}</span>
-			</p>
 
 			{/* STT recording will replace this placeholder input in a follow-up. */}
 			<label className="flex flex-col gap-1">

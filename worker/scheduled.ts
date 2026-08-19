@@ -1,7 +1,7 @@
 import type { Env } from './env';
 import { getDueClients, getEntryProgressMap, markQuizSent } from './lib/db';
 import { sendPushNotification } from './lib/push';
-import { buildQuizNotification, pickNextQuizItem } from './lib/quiz';
+import { buildScheduledNotification } from './lib/quiz';
 
 export async function handleScheduledQuizReminders(env: Env): Promise<void> {
 	const dueClients = await getDueClients(env.DB);
@@ -13,12 +13,10 @@ export async function handleScheduledQuizReminders(env: Env): Promise<void> {
 		}
 
 		const progressMap = await getEntryProgressMap(env.DB, row.id);
-		const item = pickNextQuizItem(progressMap);
-		if (!item) {
+		const payload = buildScheduledNotification(progressMap);
+		if (!payload) {
 			continue;
 		}
-
-		const payload = buildQuizNotification(item);
 		const result = await sendPushNotification(
 			env,
 			{ endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },

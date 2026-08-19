@@ -32,8 +32,14 @@ export function getQuizItemsForCourse(course: VocabularyCourse): QuizItem[] {
 	return items;
 }
 
+const QUIZ_EXCLUDED_COURSE_SLUGS = new Set(['alphabet']);
+
+export function getQuizEligibleCourses(): VocabularyCourse[] {
+	return courses.filter((course) => !QUIZ_EXCLUDED_COURSE_SLUGS.has(course.slug));
+}
+
 export function getAllQuizItems(): QuizItem[] {
-	return courses.flatMap(getQuizItemsForCourse);
+	return getQuizEligibleCourses().flatMap(getQuizItemsForCourse);
 }
 
 export function getQuizItemByKey(entryKey: string): QuizItem | undefined {

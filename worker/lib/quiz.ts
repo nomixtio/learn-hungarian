@@ -1,5 +1,23 @@
-import { getAllQuizItems, getQuizItemByKey, type QuizItem } from '../../src/lib/courses/quiz-pool';
+import {
+	getAllQuizItems,
+	getQuizEligibleCourses,
+	getQuizItemByKey,
+	type QuizItem,
+} from '../../src/lib/courses/quiz-pool';
+import type { VocabularyCourse } from '../../src/lib/courses/types';
 import type { EntryProgressRow } from './db';
+
+export type PushNotificationPayload = {
+	title: string;
+	body: string;
+	icon: string;
+	tag: string;
+	data: {
+		url: string;
+	};
+};
+
+const COURSE_REMINDER_CHANCE = 1 / 3;
 
 function scoreQuizItem(item: QuizItem, progress: EntryProgressRow | undefined, now: number): number {
 	if (!progress) {
@@ -59,7 +77,16 @@ export function pickNextQuizItem(
 	return weighted[weighted.length - 1]?.item ?? items[0] ?? null;
 }
 
-export function buildQuizNotification(item: QuizItem) {
+export function pickCourseForReminder(): VocabularyCourse | null {
+	const eligible = getQuizEligibleCourses();
+	if (eligible.length === 0) {
+		return null;
+	}
+
+	return eligible[Math.floor(Math.random() * eligible.length)] ?? null;
+}
+
+export function buildQuizNotification(item: QuizItem): PushNotificationPayload {
 	return {
 		title: 'Hungarian quiz time',
 		body: `How do you say “${item.promptEnglish}”?`,
@@ -69,4 +96,35 @@ export function buildQuizNotification(item: QuizItem) {
 			url: `/quiz?entry=${encodeURIComponent(item.entryKey)}`,
 		},
 	};
+}
+
+export function buildCourseReminderNotification(course: VocabularyCourse): PushNotificationPayload {
+	return {
+		title: 'Time to practice Hungarian',
+		body: `Continue with ${course.title}.`,
+		icon: '/logo192.png',
+		tag: 'hungarian-course-reminder',
+		data: {
+			url: `/learn/${course.slug}`,
+		},
+	};
+}
+
+export function buildScheduledNotification(
+	progressMap: Map<string, EntryProgressRow>,
+): PushNotificationPayload | null {
+	if (Math.random() < COURSE_REMINDER_CHANCE) {
+		const course = pickCourseForReminder();
+		if (course) {
+			return buildCourseReminderNotification(course);
+		}
+	}
+
+	const item = pickNextQuizItem(progressMap);
+	if (item) {
+		return buildQuizNotification(item);
+	}
+
+	const course = pickCourseForReminder();
+	return course ? buildCourseReminderNotification(course) : null;
 }
