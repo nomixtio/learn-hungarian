@@ -9,6 +9,9 @@
   },
   "license": "MIT",
   "type": "module",
+  "overrides": {
+    "@cloudflare/workers-types": "^5.20260804.1"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && tsc -p tsconfig.worker.json --noEmit && tsc -p test/worker/tsconfig.json --noEmit && vite build",
