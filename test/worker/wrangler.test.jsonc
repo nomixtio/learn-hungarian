@@ -1,0 +1,19 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "learn-hungarian-test",
+	"main": "../../worker/index.ts",
+	"compatibility_date": "2026-08-04",
+	"vars": {
+		"SONIOX_REGION": "eu",
+		"VAPID_PUBLIC_KEY": "BOuOtsVy_SDYO6QoIa730OzTyASX2xn08FaURQmirtuf-H0Iqf-y1RTD1ZTVsZGyGIqrnLreFbcIPk6DoDoZdOM",
+		"SONIOX_API_KEY": "test-soniox-key",
+		"VAPID_PRIVATE_KEY": "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"a\",\"y\":\"b\",\"d\":\"c\"}"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "learn-hungarian-test",
+			"database_id": "b1c2ccfd-01f2-48e9-9f46-d3b27ccbae8f"
+		}
+	]
+}

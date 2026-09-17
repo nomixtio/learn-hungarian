@@ -25,6 +25,12 @@ yarn-error.*
 .env
 .env*.local
 
+# test output
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
 # typescript
 *.tsbuildinfo
 
