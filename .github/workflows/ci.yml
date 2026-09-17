@@ -32,6 +32,9 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
+      # Fresh checkouts have an empty local D1 — migrate it before E2E.
+      - run: npm run test:e2e:setup
+
       # End-to-end tests (vite dev + real worker API, mocked Soniox).
       - run: npm run test:e2e
 

@@ -97,6 +97,15 @@ Open the local Vite URL. The Cloudflare Vite plugin runs the Worker (Hono API) a
 
 Unit tests live next to the code (`*.test.ts(x)`); worker integration tests live in [`test/worker/`](test/worker/) with their own [wrangler config](test/worker/wrangler.test.jsonc) and dummy secrets (never production values). E2E specs live in [`e2e/`](e2e/) and run against the real worker API with a fresh client id per test. CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs build, coverage, worker, and E2E jobs.
 
+E2E needs migrated local D1 (one-time per fresh checkout/state):
+
+```bash
+npm run test:e2e:setup
+npm run test:e2e
+```
+
+> **Warning:** E2E writes real rows. Never run it with `"remote": true` on the D1 binding in your local `wrangler.jsonc` — dev and E2E traffic will hit the **production** database. Keep local bindings local (as in [`wrangler.jsonc.example`](wrangler.jsonc.example)).
+
 ## Secrets
 
 The long-lived Soniox API key **never** ships to the browser.

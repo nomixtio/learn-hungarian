@@ -30,6 +30,7 @@
     "test:coverage": "vitest run --coverage --config vitest.config.ts",
     "test:worker": "vitest run --config test/worker/vitest.config.ts",
     "test:e2e": "playwright test",
+    "test:e2e:setup": "wrangler d1 migrations apply learn-hungarian --local",
     "test:all": "npm run test && npm run test:worker"
   },
   "dependencies": {
