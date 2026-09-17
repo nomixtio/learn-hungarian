@@ -1,0 +1,53 @@
+name: Staging
+
+# Long-lived staging environment, auto-deployed from the `staging` branch.
+# Production stays manual (see production.yml).
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check provider env
+        run: npx alchemy provider check-env
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # wrangler.jsonc is gitignored; the example provides local bindings for vite build.
+      - name: Bootstrap wrangler config
+        run: cp wrangler.jsonc.example wrangler.jsonc
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to staging
+        run: npx alchemy deploy --stage staging --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          SONIOX_API_KEY: ${{ secrets.SONIOX_API_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          SONIOX_REGION: ${{ vars.SONIOX_REGION }}
