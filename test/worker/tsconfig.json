@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+		"paths": {
+			"@/*": ["../../src/*"]
+		}
+	},
+	"include": [".", "../../worker", "../../src/lib/courses/**/*.ts", "../../src/app-version.json", "../../worker-configuration.d.ts", "../../node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts"]
+}

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # wrangler.jsonc is gitignored; the example provides local bindings (D1 + vars).
+      - run: cp wrangler.jsonc.example wrangler.jsonc
+
+      # Typechecks (app, worker, worker tests) + production build.
+      - run: npm run build
+
+      # Unit + component tests with coverage gates (see vitest.config.ts).
+      - run: npm run test:coverage
+
+      # Worker integration tests (workerd + isolated local D1).
+      - run: npm run test:worker
+
+      - run: npx playwright install --with-deps chromium
+
+      # Fresh checkouts have an empty local D1 — migrate it before E2E.
+      - run: npm run test:e2e:setup
+
+      # End-to-end tests (vite dev + real worker API, mocked Soniox).
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
