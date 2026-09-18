@@ -9,6 +9,12 @@ on:
   pull_request:
     types: [closed]
   delete: {}
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Preview stage to destroy (e.g. pr-2, br-my-feature)'
+        required: true
+        type: string
 
 jobs:
   stage:
@@ -18,7 +24,9 @@ jobs:
     steps:
       - id: compute
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ -n "${{ inputs.stage }}" ]; then
+            echo "stage=${{ inputs.stage }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "stage=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           else
             slug=$(echo "${{ github.event.ref }}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-48)
