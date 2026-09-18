@@ -57,6 +57,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check required secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "${{ secrets.ALCHEMY_PASSWORD }}" ] && missing="$missing ALCHEMY_PASSWORD"
+          [ -z "${{ secrets.SONIOX_API_KEY }}" ] && missing="$missing SONIOX_API_KEY"
+          [ -z "${{ secrets.VAPID_PRIVATE_KEY }}" ] && missing="$missing VAPID_PRIVATE_KEY"
+          [ -z "${{ secrets.VAPID_PUBLIC_KEY }}" ] && missing="$missing VAPID_PUBLIC_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub secrets:$missing — add them under Settings > Secrets and variables > Actions, then re-run."
+            exit 1
+          fi
+
       - name: Check provider env
         run: npx alchemy provider check-env
         env:
@@ -103,6 +117,17 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check required secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "${{ secrets.ALCHEMY_PASSWORD }}" ] && missing="$missing ALCHEMY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub secrets:$missing — add them under Settings > Secrets and variables > Actions, then re-run."
+            exit 1
+          fi
 
       - name: Safety check
         run: |
