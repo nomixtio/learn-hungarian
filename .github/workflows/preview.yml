@@ -18,7 +18,7 @@ on:
 
 jobs:
   stage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       name: ${{ steps.compute.outputs.stage }}
     steps:
@@ -35,7 +35,7 @@ jobs:
 
   cleanup:
     needs: stage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: write

@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -51,7 +51,7 @@ jobs:
   deploy-staging:
     needs: test
     if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -107,7 +107,7 @@ jobs:
   deploy-preview:
     needs: test
     if: github.event_name == 'pull_request' && github.event.action != 'closed' || github.event_name == 'push' && github.ref != 'refs/heads/master' && github.ref != 'refs/heads/staging'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
