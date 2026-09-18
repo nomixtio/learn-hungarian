@@ -100,3 +100,76 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           SONIOX_REGION: ${{ vars.SONIOX_REGION }}
+
+  # Ephemeral per-branch environments (own isolated D1, no cron).
+  # Runs only after the test job above succeeds. Destroyed on PR
+  # close / branch delete by preview.yml.
+  deploy-preview:
+    needs: test
+    if: github.event_name == 'pull_request' && github.event.action != 'closed' || github.event_name == 'push' && github.ref != 'refs/heads/master' && github.ref != 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check required secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "${{ secrets.ALCHEMY_PASSWORD }}" ] && missing="$missing ALCHEMY_PASSWORD"
+          [ -z "${{ secrets.SONIOX_API_KEY }}" ] && missing="$missing SONIOX_API_KEY"
+          [ -z "${{ secrets.VAPID_PRIVATE_KEY }}" ] && missing="$missing VAPID_PRIVATE_KEY"
+          [ -z "${{ secrets.VAPID_PUBLIC_KEY }}" ] && missing="$missing VAPID_PUBLIC_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub secrets:$missing — add them under Settings > Secrets and variables > Actions, then re-run."
+            exit 1
+          fi
+
+      - name: Check provider env
+        run: npx alchemy provider check-env --provider Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # wrangler.jsonc is gitignored; the example provides local bindings for vite build.
+      - run: cp wrangler.jsonc.example wrangler.jsonc
+
+      - run: npm run build
+
+      - name: Compute stage
+        id: stage
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "name=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          else
+            slug=$(echo "${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-48)
+            echo "name=br-${slug}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy preview
+        run: npx alchemy deploy --stage "${{ steps.stage.outputs.name }}" --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          SONIOX_API_KEY: ${{ secrets.SONIOX_API_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          SONIOX_REGION: ${{ vars.SONIOX_REGION }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
