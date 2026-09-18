@@ -1,0 +1,74 @@
+name: Preview cleanup
+
+# Destroys ephemeral preview environments created by ci.yml's
+# deploy-preview job (own isolated D1, no cron):
+#   PR closed      -> destroy `pr-<n>`
+#   branch deleted -> destroy `br-<slug>`
+
+on:
+  pull_request:
+    types: [closed]
+  delete: {}
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.compute.outputs.stage }}
+    steps:
+      - id: compute
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "stage=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          else
+            slug=$(echo "${{ github.event.ref }}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-48)
+            echo "stage=br-${slug}" >> "$GITHUB_OUTPUT"
+          fi
+
+  cleanup:
+    needs: stage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      STAGE: ${{ needs.stage.outputs.name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check required secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "${{ secrets.ALCHEMY_PASSWORD }}" ] && missing="$missing ALCHEMY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub secrets:$missing — add them under Settings > Secrets and variables > Actions, then re-run."
+            exit 1
+          fi
+
+      - name: Safety check
+        run: |
+          case "$STAGE" in
+            production|staging|live_*|dev_*|test_*)
+              echo "ERROR: refusing to destroy protected stage '$STAGE'"
+              exit 1
+              ;;
+          esac
+
+      - name: Destroy preview environment
+        run: npx alchemy destroy --stage "$STAGE" --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

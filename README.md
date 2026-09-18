@@ -166,6 +166,37 @@ npm run deploy
 
 Or wire CI to `npm run deploy` with Cloudflare API credentials stored in GitHub Actions secrets (not in source). This project is a **Worker with static assets**, not a Pages-only site.
 
+## Environments (Alchemy)
+
+Cloudflare environments are defined in [`alchemy.run.ts`](alchemy.run.ts) and deployed automatically:
+
+| Stage | Source | Lifecycle |
+|-------|--------|-----------|
+| `production` | `master`, manual (`Production` workflow) | Long-lived, adopts the existing Worker + D1 |
+| `staging` | `staging` branch, auto on push | Long-lived, own Worker + D1 + website |
+| `pr-<n>` | pull request, auto | Ephemeral, own D1, URL posted on the PR, destroyed on close |
+| `br-<slug>` | any other branch push, auto | Ephemeral, own D1, destroyed on branch delete |
+
+Previews never run the hourly cron (no real push notifications) and never touch staging/production data. The marketing site only deploys to `staging`/`production`.
+
+Local commands (requires `npx alchemy profile edit --add Cloudflare` once):
+
+```bash
+npm run build                        # always build first — deploys serve dist/client
+npm run deploy:staging               # build + deploy the staging stage
+npm run deploy:production            # build + deploy production (manual only)
+npx alchemy plan --stage pr-42       # preview changes without applying
+npx alchemy destroy --stage br-x --yes
+```
+
+First production deploy must adopt the Wrangler-managed resources (run once, or pass `true` to the `adopt` input of the `Production` workflow):
+
+```bash
+npx alchemy deploy --stage production --adopt
+```
+
+Required GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` (Workers Scripts/D1/Secrets Store write), `CLOUDFLARE_ACCOUNT_ID`, `ALCHEMY_PASSWORD` (state encryption), `SONIOX_API_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_PUBLIC_KEY`. Optional variable: `SONIOX_REGION` (defaults to `eu`). The classic Wrangler path (`wrangler.jsonc` + `npm run deploy`) still works and remains the fallback until the first Alchemy production deploy succeeds.
+
 ## Marketing site
 
 The public landing page lives in [`website/`](website/) and deploys as a **separate** Worker (`learn-hungarian-web`). It points visitors to GitHub / self-hosting only — there is no link to a hosted app instance.

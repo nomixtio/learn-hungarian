@@ -12,6 +12,9 @@ website/.wrangler/
 /wrangler.jsonc
 .dev.vars
 
+# Alchemy (local state cache, profiles live in ~/.alchemy)
+.alchemy/
+
 # debug
 npm-debug.*
 yarn-debug.*
