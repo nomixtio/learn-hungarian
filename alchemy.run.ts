@@ -89,8 +89,10 @@ export default Alchemy.Stack(
 			crons,
 			env: {
 				DB: db,
-				SONIOX_REGION: process.env.SONIOX_REGION ?? "eu",
-				VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY ?? DEFAULT_VAPID_PUBLIC_KEY,
+				// Empty string (unset GitHub var) must fall back too — `??` alone would keep "".
+				SONIOX_REGION: process.env.SONIOX_REGION?.trim() || "eu",
+				VAPID_PUBLIC_KEY:
+					process.env.VAPID_PUBLIC_KEY?.trim() || DEFAULT_VAPID_PUBLIC_KEY,
 				SONIOX_API_KEY: Config.redacted("SONIOX_API_KEY"),
 				VAPID_PRIVATE_KEY: Config.redacted("VAPID_PRIVATE_KEY"),
 			},
