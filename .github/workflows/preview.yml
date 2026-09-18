@@ -9,16 +9,24 @@ on:
   pull_request:
     types: [closed]
   delete: {}
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Preview stage to destroy (e.g. pr-2, br-my-feature)'
+        required: true
+        type: string
 
 jobs:
   stage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       name: ${{ steps.compute.outputs.stage }}
     steps:
       - id: compute
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ -n "${{ inputs.stage }}" ]; then
+            echo "stage=${{ inputs.stage }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "stage=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           else
             slug=$(echo "${{ github.event.ref }}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-48)
@@ -27,16 +35,16 @@ jobs:
 
   cleanup:
     needs: stage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: write
     env:
       STAGE: ${{ needs.stage.outputs.name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -70,5 +78,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          # Destroy still evaluates the stack, which reads these bindings.
+          SONIOX_API_KEY: ${{ secrets.SONIOX_API_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          SONIOX_REGION: ${{ vars.SONIOX_REGION }}
           PULL_REQUEST: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
