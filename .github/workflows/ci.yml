@@ -106,7 +106,9 @@ jobs:
   # close / branch delete by preview.yml.
   deploy-preview:
     needs: test
-    if: github.event_name == 'pull_request' && github.event.action != 'closed' || github.event_name == 'push' && github.ref != 'refs/heads/master' && github.ref != 'refs/heads/staging'
+    # Dependabot PRs get no repo secrets (GitHub restriction), so previews
+    # can't deploy there — tests still gate. Previews stay for human branches.
+    if: ((github.event_name == 'pull_request' && github.event.action != 'closed') || (github.event_name == 'push' && github.ref != 'refs/heads/master' && github.ref != 'refs/heads/staging')) && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
