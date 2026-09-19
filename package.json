@@ -42,7 +42,7 @@
     "@soniox/client": "^2.1.0",
     "@soniox/react": "^2.1.0",
     "@tanstack/react-router": "^1.170.18",
-    "hono": "^4.13.0",
+    "hono": "^4.13.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
@@ -63,7 +63,7 @@
     "@types/react-dom": "~19.2.2",
     "@vitejs/plugin-react": "^4.7.0",
     "@vitest/coverage-v8": "^3.2.7",
-    "alchemy": "^2.0.0-beta.77",
+    "alchemy": "^2.0.0-pipeline-v2-test",
     "effect": "^4.0.0-rc.112",
     "jsdom": "^26.1.0",
     "msw": "^2.15.0",
