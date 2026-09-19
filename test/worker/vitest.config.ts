@@ -1,10 +1,17 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
+import { cloudflareTest } from '@cloudflare/vitest-pool-workers';
+import { defineConfig } from 'vitest/config';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineWorkersConfig({
+export default defineConfig({
+	plugins: [
+		cloudflareTest({
+			main: path.resolve(here, '../../worker/index.ts'),
+			wrangler: { configPath: path.resolve(here, './wrangler.test.jsonc') },
+		}),
+	],
 	resolve: {
 		alias: {
 			'@': path.resolve(here, '../../src'),
@@ -12,13 +19,5 @@ export default defineWorkersConfig({
 	},
 	test: {
 		include: ['test/worker/**/*.test.ts'],
-		poolOptions: {
-			workers: {
-				main: path.resolve(here, '../../worker/index.ts'),
-				singleWorker: true,
-				isolatedStorage: true,
-				wrangler: { configPath: path.resolve(here, './wrangler.test.jsonc') },
-			},
-		},
 	},
 });
