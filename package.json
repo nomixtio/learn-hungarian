@@ -42,7 +42,7 @@
     "@pushforge/builder": "^2.0.5",
     "@soniox/client": "^2.3.0",
     "@soniox/react": "^2.1.0",
-    "@tanstack/react-router": "^1.170.18",
+    "@tanstack/react-router": "^1.170.36",
     "hono": "^4.13.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
@@ -66,7 +66,7 @@
     "@vitest/coverage-v8": "^3.2.7",
     "alchemy": "2.0.0-beta.77",
     "effect": "4.0.0-rc.112",
-    "jsdom": "^26.1.0",
+    "jsdom": "^30.0.1",
     "msw": "^2.15.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
