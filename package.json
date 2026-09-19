@@ -10,7 +10,8 @@
   "license": "MIT",
   "type": "module",
   "overrides": {
-    "@cloudflare/workers-types": "^5.20260804.1"
+    "@cloudflare/workers-types": "^5.20260804.1",
+    "postcss": "^8.5.28"
   },
   "scripts": {
     "dev": "vite",
@@ -39,7 +40,7 @@
   },
   "dependencies": {
     "@pushforge/builder": "^2.0.5",
-    "@soniox/client": "^2.1.0",
+    "@soniox/client": "^2.3.0",
     "@soniox/react": "^2.1.0",
     "@tanstack/react-router": "^1.170.36",
     "hono": "^4.13.8",
@@ -47,7 +48,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.50.0",
+    "@cloudflare/vite-plugin": "^1.54.10",
     "@cloudflare/vitest-pool-workers": "^0.8.71",
     "@cloudflare/workers-types": "^5.20260804.1",
     "@effect/platform-node": "4.0.0-rc.112",
@@ -72,7 +73,7 @@
     "typescript": "~6.0.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.7",
-    "wrangler": "^4.118.0"
+    "wrangler": "^4.132.0"
   },
   "main": "index.js",
   "directories": {
