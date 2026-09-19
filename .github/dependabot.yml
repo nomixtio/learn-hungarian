@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # The Alchemy/Effect toolchain is pinned to exact, mutually verified
+    # versions (see AGENTS.md). Never auto-bump: re-resolution can pull
+    # unpublished test tags (e.g. 2.0.0-pipeline-v2-test). Upgrade deliberately.
+    ignore:
+      - dependency-name: alchemy
+      - dependency-name: effect
+      - dependency-name: "@effect/*"
+    # Vitest majors need test-code migration (mock constructor behavior).
+    # Keep them visible but never auto-merge; handle deliberately.
+    open-pull-requests-limit: 10
