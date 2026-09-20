@@ -11,7 +11,11 @@ const { recordingMock, startMock, stopMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('@soniox/client', () => ({
-	MicrophoneSource: vi.fn().mockImplementation(() => ({})),
+	// Must be `function`, not an arrow: the component constructs it with
+	// `new`, and Vitest ≥4 throws `is not a constructor` otherwise.
+	MicrophoneSource: vi.fn().mockImplementation(function () {
+		return {};
+	}),
 }));
 
 vi.mock('@soniox/react', () => ({
