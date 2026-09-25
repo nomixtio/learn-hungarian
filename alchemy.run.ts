@@ -3,8 +3,8 @@
 // Stages:
 //   production  manual deploys from `master` (adopts the existing Worker + D1)
 //   staging     auto-deploys from the `staging` branch (long-lived)
-//   pr-<n>      ephemeral PR previews, own D1, destroyed on PR close
-//   br-<slug>   ephemeral branch previews, own D1, destroyed on branch delete
+//   pr-<n>      ephemeral PR previews, share the staging D1, destroyed on PR close
+//   br-<slug>   ephemeral branch previews, share the staging D1, destroyed on branch delete
 //
 // Local usage (requires `alchemy profile edit --add Cloudflare` once):
 //   npx alchemy plan --stage staging
@@ -24,6 +24,7 @@
 //   SONIOX_REGION (default "eu"), VAPID_PUBLIC_KEY (default staging key below)
 import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
+import { retain } from "alchemy/RemovalPolicy";
 import { Stack } from "alchemy/Stack";
 import * as GitHub from "alchemy/GitHub";
 import * as Output from "alchemy/Output";
@@ -64,14 +65,21 @@ export default Alchemy.Stack(
 		// Cron reminders send real push notifications — only on long-lived envs.
 		const crons = isPreview ? [] : ["0 * * * *"];
 
-		const db = yield* Cloudflare.D1.Database("db", {
-			...(isProduction
-				? { name: PROD_DB_NAME }
-				: isStaging
-					? { name: STAGING_DB_NAME }
-					: {}),
-			migrations: "./migrations",
-		});
+		// Previews bind to the staging D1 instead of provisioning their own:
+		// cheaper, no orphaned databases, and preview data matches staging.
+		// The retain policy is load-bearing: the provider adopts the existing
+		// database by name, so without it `alchemy destroy --stage pr-N`
+		// would delete the shared staging database. Migrations run only on
+		// staging/production deploys — previews must never migrate the
+		// shared DB forward from a feature branch.
+		const db = isPreview
+			? yield* Cloudflare.D1.Database("db", {
+					name: STAGING_DB_NAME,
+				}).pipe(retain())
+			: yield* Cloudflare.D1.Database("db", {
+					name: isProduction ? PROD_DB_NAME : STAGING_DB_NAME,
+					migrations: "./migrations",
+				});
 
 		const app = yield* Cloudflare.Worker("app", {
 			...(isProduction
@@ -119,8 +127,9 @@ export default Alchemy.Stack(
 
 					**URL:** ${app.url}
 
-					Built from commit ${github.sha.slice(0, 7)}. Isolated D1 database with
-					migrations auto-applied. Cron reminders are disabled on previews.
+					Built from commit ${github.sha.slice(0, 7)}. Shares the staging D1
+					database (writes affect staging data; migrations are not applied
+					from previews). Cron reminders are disabled on previews.
 
 					---
 					_This comment updates automatically with each push. Destroyed on PR close._

@@ -22,8 +22,8 @@ Vite + React 19 PWA + Hono API in `worker/`, deployed as one Worker with static 
 
 ## Infra (Alchemy, `alchemy.run.ts`)
 
-- Stages: `production` (manual, from `master`), `staging` (auto from `staging` branch), `pr-<n>` / `br-<slug>` (ephemeral, own D1). Stage names must match `[a-z0-9]+([-_a-z0-9]+)*`.
-- Previews get isolated D1 and **no cron** (cron sends real push notifications — only staging/production set `crons`). Marketing site deploys to long-lived stages only.
+- Stages: `production` (manual, from `master`), `staging` (auto from `staging` branch), `pr-<n>` / `br-<slug>` (ephemeral, share the staging D1). Stage names must match `[a-z0-9]+([-_a-z0-9]+)*`.
+- Previews share the staging D1 (writes affect staging data; previews never run migrations) and get **no cron** (cron sends real push notifications — only staging/production set `crons`). Marketing site deploys to long-lived stages only.
 - CI (`ci.yml`): `test` → `deploy-staging` (staging ref only) / `deploy-preview` (PRs + other branches). `preview.yml` is destroy-only. Never add `--adopt` to any workflow — one-time production adoption is done.
 - `alchemy destroy` evaluates the full stack, so destroy jobs need the app secrets too, not just Cloudflare creds.
 - D1 migrations live in `migrations/` and auto-apply on deploy; local worker tests use isolated D1, E2E uses `--local`.

@@ -101,9 +101,11 @@ jobs:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           SONIOX_REGION: ${{ vars.SONIOX_REGION }}
 
-  # Ephemeral per-branch environments (own isolated D1, no cron).
+  # Ephemeral per-branch environments (share the staging D1, no cron).
   # Runs only after the test job above succeeds. Destroyed on PR
-  # close / branch delete by preview.yml.
+  # close / branch delete by preview.yml, plus a post-deploy self-clean
+  # below in case the PR closed (or the branch vanished) while the
+  # deploy was still running.
   deploy-preview:
     needs: test
     # Dependabot PRs get no repo secrets (GitHub restriction), so previews
@@ -175,3 +177,61 @@ jobs:
           PULL_REQUEST: ${{ github.event.pull_request.number }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Race guard: preview.yml's destroy may have run while this deploy was
+      # still in flight (PR merged/closed mid-deploy), leaving an orphaned
+      # Worker behind. If the PR is already closed — or the branch is gone /
+      # has no open PR left — destroy the stage we just deployed.
+      # Skipped for master/staging (this job never previews those refs).
+      - name: Destroy preview if already obsolete
+        if: always()
+        run: |
+          STAGE="${{ steps.stage.outputs.name }}"
+          if [ -z "$STAGE" ]; then
+            echo "ERROR: empty stage name, refusing to destroy"
+            exit 1
+          fi
+          case "$STAGE" in
+            production|staging|live_*|dev_*|test_*)
+              echo "ERROR: refusing to destroy protected stage '$STAGE'"
+              exit 1
+              ;;
+          esac
+          SHOULD_DESTROY=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR="${{ github.event.pull_request.number }}"
+            STATE=$(gh pr view "$PR" --json state -q .state --repo "${{ github.repository }}")
+            echo "PR #$PR state: $STATE"
+            case "$STATE" in
+              MERGED|CLOSED) SHOULD_DESTROY="PR #$PR is $STATE" ;;
+            esac
+          else
+            BRANCH="${{ github.ref_name }}"
+            if ! gh api "repos/${{ github.repository }}/branches/$BRANCH" --silent 2>/dev/null; then
+              SHOULD_DESTROY="branch '$BRANCH' no longer exists"
+            else
+              OPEN_COUNT=$(gh pr list --head "$BRANCH" --state open --json number -q length --repo "${{ github.repository }}")
+              CLOSED_COUNT=$(gh pr list --head "$BRANCH" --state closed --json number -q length --repo "${{ github.repository }}")
+              echo "Branch '$BRANCH': $OPEN_COUNT open / $CLOSED_COUNT closed PRs"
+              if [ "$OPEN_COUNT" = "0" ] && [ "$CLOSED_COUNT" != "0" ]; then
+                SHOULD_DESTROY="branch '$BRANCH' has no open PR left"
+              fi
+            fi
+          fi
+          if [ -z "$SHOULD_DESTROY" ]; then
+            echo "Preview still wanted — keeping stage $STAGE."
+            exit 0
+          fi
+          echo "--- Destroying stage $STAGE ($SHOULD_DESTROY) ---"
+          npx alchemy destroy --stage "$STAGE" --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          SONIOX_API_KEY: ${{ secrets.SONIOX_API_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          SONIOX_REGION: ${{ vars.SONIOX_REGION }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
