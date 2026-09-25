@@ -1,7 +1,9 @@
 name: Preview cleanup
 
 # Destroys ephemeral preview environments created by ci.yml's
-# deploy-preview job (own isolated D1, no cron).
+# deploy-preview job (share the staging D1, no cron).
+# Destroy only drops the preview Worker from state — the shared staging
+# database is retained, never deleted (see RemovalPolicy in alchemy.run.ts).
 #
 # A branch PR deploys TWO stages: `pr-<n>` (PR events) and `br-<slug>`
 # (push events). PR close destroys both, so nothing lingers when the

@@ -174,10 +174,10 @@ Cloudflare environments are defined in [`alchemy.run.ts`](alchemy.run.ts) and de
 |-------|--------|-----------|
 | `production` | `master`, manual (`Production` workflow) | Long-lived, adopts the existing Worker + D1 |
 | `staging` | `staging` branch, auto on push | Long-lived, own Worker + D1 + website |
-| `pr-<n>` | pull request, auto | Ephemeral, own D1, URL posted on the PR, destroyed on close |
-| `br-<slug>` | any other branch push, auto | Ephemeral, own D1, destroyed on branch delete |
+| `pr-<n>` | pull request, auto | Ephemeral, shares the staging D1, URL posted on the PR, destroyed on close |
+| `br-<slug>` | any other branch push, auto | Ephemeral, shares the staging D1, destroyed on branch delete |
 
-Previews never run the hourly cron (no real push notifications) and never touch staging/production data. The marketing site only deploys to `staging`/`production`.
+Previews never run the hourly cron (no real push notifications) but share the staging D1, so preview writes affect staging data; migrations run only on staging/production deploys, never from previews. The marketing site only deploys to `staging`/`production`.
 
 Local commands (requires `npx alchemy profile edit --add Cloudflare` once):
 
