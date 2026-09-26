@@ -63,7 +63,7 @@
     "@types/react": "~19.2.2",
     "@types/react-dom": "~19.2.2",
     "@vitejs/plugin-react": "^4.7.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.1",
     "alchemy": "2.0.0-beta.77",
     "effect": "4.0.0-rc.112",
     "jsdom": "^30.0.1",
