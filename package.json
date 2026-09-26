@@ -73,7 +73,7 @@
     "typescript": "~6.0.3",
     "vite": "^6.3.5",
     "vitest": "^4.1.11",
-    "wrangler": "^4.132.0"
+    "wrangler": "^4.136.3"
   },
   "main": "index.js",
   "directories": {
